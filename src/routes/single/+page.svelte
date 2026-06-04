@@ -42,10 +42,14 @@
 		const lines: DiffLine[] = [];
 		let pending: LinePart[] = [];
 
+		// 遍历所有 diff part，将每个 part 分配到正确的行中
 		for (let idx = 0; idx < diffResult.length; idx++) {
 			const part = diffResult[idx];
 			const vt = visualType(part, decisions[idx], side);
 			if (vt === 'hidden') {
+				// diffWords 可能把 \n 字符归属到 added 部分中（而非 common 部分）。
+				// 当 added 部分被拒绝（隐藏）时，如果跳过整个部分会丢失其中的 \n，
+				// 导致本应换行的文本合并到同一行。这里只消耗 \n 产生换行，不追加文本。
 				const segments = part.value.split('\n');
 				for (let s = 0; s < segments.length - 1; s++) {
 					lines.push({ parts: pending });
@@ -54,11 +58,13 @@
 				continue;
 			}
 
+			// 按 \n 切分后，每个 except 最后一个 seg 后面都有一个 \n
 			const segments = part.value.split('\n');
 			for (let s = 0; s < segments.length; s++) {
 				if (segments[s]) {
 					pending.push({ text: segments[s], type: vt, sourceIdx: idx });
 				}
+				// 同一 part 内遇到 \n 就换行
 				if (s < segments.length - 1) {
 					lines.push({ parts: pending });
 					pending = [];
@@ -66,6 +72,7 @@
 			}
 		}
 
+		// 收尾：确保最后一段内容也被输出
 		if (pending.length > 0 || lines.length === 0) {
 			lines.push({ parts: pending });
 		}
