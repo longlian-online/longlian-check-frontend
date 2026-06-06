@@ -69,10 +69,10 @@
 		return lines;
 	}
 
-	function buildResultLines(): DiffLine[] {
-		// 右侧结果视图：只保留用户"保留"的文本，隐藏的部分仍需消耗其中的换行
-		const lines: DiffLine[] = [];
-		let pending: LinePart[] = [];
+	function buildResultLines(): string[] {
+		// 右侧结果视图：只关心最终每一行显示的字符串
+		const lines: string[] = [];
+		let pending = '';
 
 		for (let idx = 0; idx < diffResult.length; idx++) {
 			const part = diffResult[idx];
@@ -81,28 +81,26 @@
 			if (vt === 'hidden') {
 				// 被隐藏的部分不输出文本，但其中的 \n 仍需产生换行，
 				// 否则拒绝一个含换行的 added 段会导致上下行合并
-				const newlineCount = part.value.split('\n').length - 1;
-				for (let i = 0; i < newlineCount; i++) {
-					lines.push({ parts: pending });
-					pending = [];
+				const segments = part.value.split('\n');
+				for (let s = 0; s < segments.length - 1; s++) {
+					lines.push(pending);
+					pending = '';
 				}
 				continue;
 			}
 
 			const segments = part.value.split('\n');
 			for (let s = 0; s < segments.length; s++) {
-				if (segments[s]) {
-					pending.push({ text: segments[s], type: 'unchanged', sourceIdx: idx });
-				}
+				pending += segments[s];
 				if (s < segments.length - 1) {
-					lines.push({ parts: pending });
-					pending = [];
+					lines.push(pending);
+					pending = '';
 				}
 			}
 		}
 
-		if (pending.length > 0 || lines.length === 0) {
-			lines.push({ parts: pending });
+		if (pending || lines.length === 0) {
+			lines.push(pending);
 		}
 
 		return lines;
@@ -111,15 +109,7 @@
 	const diffLines = $derived(buildDiffLines());
 	const resultLines = $derived(buildResultLines());
 
-	const resultText = $derived.by(() => {
-		let text = '';
-		for (let idx = 0; idx < resultLines.length; idx++) {
-			const part = resultLines[idx];
-			text += part.parts.map((p) => p.text).join('');
-			text += '\n';
-		}
-		return text;
-	});
+	const resultText = $derived(resultLines.join('\n'));
 
 	$effect(() => {
 		submitResultText(resultText);
@@ -187,9 +177,7 @@
 				>{i + 1}</span
 			>
 			<span class="py-0.5 pl-2 break-words whitespace-pre-wrap">
-				{#each line.parts as part}
-					{part.text}
-				{/each}
+				{line}
 			</span>
 		</div>
 	{/each}
