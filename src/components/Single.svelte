@@ -1,6 +1,5 @@
 <script lang="ts">
 	import '../app.css';
-	import { raw_text, check_text } from '$lib';
 	import { diffWords } from 'diff';
 
 	type WordChange = { value: string; added?: boolean; removed?: boolean };
@@ -8,10 +7,10 @@
 	type LinePart = { text: string; type: string; sourceIdx: number };
 	type DiffLine = { parts: LinePart[] };
 
-	const { submitResultText }: { submitResultText: (text: string) => void } = $props();
+	const { submitResultText, rawText, resultText: aiCheckResultText }: { submitResultText: (text: string) => void, rawText: string, resultText: string } = $props();
 
 	// 计算 raw_text 和 check_text 之间的差异，得到一个包含所有变更的数组。
-	const diffResult: WordChange[] = diffWords(raw_text, check_text);
+	const diffResult: WordChange[] = diffWords(rawText, aiCheckResultText);
 
 	let decisions: ('accepted' | 'rejected' | null)[] = $state(diffResult.map(() => null));
 
