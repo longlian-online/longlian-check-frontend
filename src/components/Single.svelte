@@ -10,9 +10,13 @@
 	const { submitResultText, rawText, resultText: aiCheckResultText }: { submitResultText: (text: string) => void, rawText: string, resultText: string } = $props();
 
 	// 计算 raw_text 和 check_text 之间的差异，得到一个包含所有变更的数组。
-	const diffResult: WordChange[] = diffWords(rawText, aiCheckResultText);
+	const diffResult = $derived(diffWords(rawText, aiCheckResultText));
 
-	let decisions: ('accepted' | 'rejected' | null)[] = $state(diffResult.map(() => null));
+	let decisions: ('accepted' | 'rejected' | null)[] = $state([]);
+
+	$effect(() => {
+		decisions = diffResult.map(() => null);
+	});
 
 	function visualType(
 		part: WordChange,
