@@ -1,111 +1,38 @@
 <script lang="ts">
-	import '../app.css';
-	import { raw_text, check_text } from '$lib';
-	import { diffWords } from 'diff';
+  import TopBar from "$lib/components/TopBar.svelte";
+  import ProjectSidebar from "$lib/components/ProjectSidebar.svelte";
+  import EditorArea from "$lib/components/EditorArea.svelte";
+  import SuggestionPanel from "$lib/components/SuggestionPanel.svelte";
+  import StatusBar from "$lib/components/StatusBar.svelte";
 
-	// diff 库返回的单个变更块
-	type WordChange = { value: string; added?: boolean; removed?: boolean };
+  const chapters = [
+    { label: "§ 第一章 · 序幕", active: true },
+    { label: "§ 第二章 · 雨夜", active: false },
+    { label: "§ 第三章 · 归途", active: false },
+  ];
 
-	// 行内的一个片段（连续相同状态的文字）
-	type LinePart = { text: string; type: string };
-	// 由多个片段组成的一行
-	type DiffLine = { parts: LinePart[] };
+  const suggestions = [
+    { word: "stood silent", reason: "保持拟人化修辞，与「silent」形成头韵" },
+    { word: "loomed", reason: "带压迫感，契合后文「阴影」「宽檐黑帽」的暗色调" },
+    { word: "towered", reason: "字面直译，保留空间高度感" },
+    { word: "rose", reason: "极简风格，与后续长句形成节奏对比" },
+  ];
 
-	// 对整个文本做单词级 diff
-	const diffResult: WordChange[] = diffWords(raw_text, check_text);
+  const sourceText = `The old clock tower stood silent against the grey November sky, its hands frozen at a quarter past three. No one in the village could remember when it had last chimed, but everyone agreed — it had been at least a generation.<br /><br />Below the tower, Mù Jūchí paused to adjust the collar of his coat. The wind carried the scent of rain and fallen leaves.<br /><br />"You're late," said a voice from the shadows.<br /><br />He turned. A woman stepped out from the archway, her features half-hidden by the brim of a dark felt hat. In her gloved hand, she held a leather notebook — the same notebook he had last seen on his father's desk, ten years ago.`;
 
-	/**
-	 * 根据一侧的过滤条件，将 diffResult 按 \n 切分为可渲染的行。
-	 * left 侧只取 unchanged + removed，right 侧只取 unchanged + added。
-	 *
-	 * 思路：先将 diff 结果展开为{字符,类型}序列，
-	 *       再按换行符分段，合并同一行内相邻的相同类型文字。
-	 */
-	function buildLines(side: 'left' | 'right'): DiffLine[] {
-		// 展开为字符序列，每个字符附带其在 diff 中的状态
-		const chars: { char: string; type: string }[] = [];
-
-		for (const part of diffResult) {
-			if (side === 'left' && part.added) continue;
-			if (side === 'right' && part.removed) continue;
-
-			const type = part.removed ? 'removed' : part.added ? 'added' : 'unchanged';
-			for (const char of part.value) {
-				chars.push({ char, type });
-			}
-		}
-
-		// 按 \n 切分行，行内合并相邻同类型片段
-		const lines: DiffLine[] = [];
-		let current: LinePart[] = [];
-
-		for (const c of chars) {
-			if (c.char === '\n') {
-				// 换行符终结当前行
-				lines.push({ parts: current });
-				current = [];
-			} else {
-				const last = current[current.length - 1];
-				if (last && last.type === c.type) {
-					// 与上一片段类型相同，合并
-					last.text += c.char;
-				} else {
-					// 类型不同，开启新片段
-					current.push({ text: c.char, type: c.type });
-				}
-			}
-		}
-
-		// 最后一行（文件末尾可能没有换行符）
-		if (current.length > 0 || lines.length === 0) {
-			lines.push({ parts: current });
-		}
-
-		return lines;
-	}
-
-	// 两侧分别独立构建行
-	const leftLines = buildLines('left');
-	const rightLines = buildLines('right');
+  const targetText = `古老的钟楼矗立在十一月灰色的天空下，指针凝固在三点一刻。村里已没有人记得它最后一次报时是什么时候，但大家都一致认为——至少已有一代人的光景。<br /><br />钟楼下，暮居池停下脚步，理了理大衣的领子。风里带着雨水和落叶的气息。<br /><br />"你迟到了。"阴影中传来一个声音。<br /><br />他转过身。一位女子从拱门下走出来，宽檐黑帽半掩着她的面容。戴着手套的手中，她握着一本皮面笔记——正是他十年前最后一次在父亲书桌上见到的那本。`;
 </script>
 
-<div class="flex h-screen w-full flex-col">
-	<div class="flex-none p-4">
-		<h1 class="text-center text-2xl font-bold">Longlian Check</h1>
-	</div>
-	<div class="flex flex-1 overflow-hidden">
-		<!-- 左侧：原文，删除内容标红 -->
-		<div class="flex-1 overflow-auto font-mono text-sm leading-relaxed">
-			{#each leftLines as line, i}
-				<div class="flex">
-					<span class="sticky left-0 w-10 shrink-0 border-r border-base-content/10 bg-base-300 py-0.5 pr-2 text-right text-base-content/40 select-none">{i + 1}</span>
-					<span class="whitespace-pre-wrap break-words py-0.5 pl-2">
-						{#each line.parts as part}
-							<span
-								class={part.type === 'removed' ? 'bg-red-200 text-red-800 line-through rounded px-0.5' : ''}
-							>{part.text}</span>
-						{/each}
-					</span>
-				</div>
-			{/each}
-		</div>
+<div class="flex h-screen flex-col overflow-hidden">
+  <TopBar activeTab="翻译模式" />
 
-		<div class="divider divider-horizontal"></div>
+  <div class="flex flex-1 overflow-hidden">
+    <ProjectSidebar {chapters} />
 
-		<!-- 右侧：check 结果，新增内容标绿 -->
-		<div class="flex-1 overflow-auto font-mono text-sm leading-relaxed">
-			{#each rightLines as line, i}
-				<div class="flex">
-					<span class="sticky left-0 w-10 shrink-0 border-r border-base-content/10 bg-base-300 py-0.5 pr-2 text-right text-base-content/40 select-none">{i + 1}</span>
-					<span class="whitespace-pre-wrap break-words py-0.5 pl-2">
-						{#each line.parts as part}
-							<span
-								class={part.type === 'added' ? 'bg-green-200 text-green-800 rounded px-0.5' : ''}
-							>{part.text}</span>
-						{/each}
-					</span>
-				</div>
-			{/each}
-		</div>
-	</div>
+    <EditorArea {sourceText} {targetText} />
+
+    <SuggestionPanel title="AI 翻译建议" subtitle="矗立" {suggestions} />
+  </div>
+
+  <StatusBar suggestionCount={4} chatCount={3} cursorPos="行 12, 列 24" />
 </div>
