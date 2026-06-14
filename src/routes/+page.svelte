@@ -5,8 +5,10 @@
   import ProofreadArea from "$lib/components/ProofreadArea.svelte";
   import SuggestionPanel from "$lib/components/SuggestionPanel.svelte";
   import StatusBar from "$lib/components/StatusBar.svelte";
+  import TerminologyView from "$lib/components/TerminologyView.svelte";
+  import SettingsContent from "$lib/components/SettingsContent.svelte";
 
-  type Mode = "翻译模式" | "校对模式" | "术语库";
+  type Mode = "翻译模式" | "校对模式" | "术语库" | "设置";
 
   let mode = $state<Mode>("翻译模式");
   let activeChapter = $state(0);
@@ -69,8 +71,17 @@
     cursorPos = "行 1, 列 1";
   }
 
+  const termEntries = [
+    { source: "Mù Jūchí", target: "暮居池" },
+    { source: "clock tower", target: "钟楼" },
+    { source: "leather notebook", target: "皮面笔记" },
+    { source: "archway", target: "拱门" },
+    { source: "Dark Felt Hat", target: "宽檐黑帽" },
+    { source: "chimed", target: "报时" },
+  ];
+
   function handleSettingsClick() {
-    mode = "术语库";
+    mode = "设置";
   }
 
   function handleAdopt(index: number) {
@@ -95,7 +106,7 @@
 </script>
 
 <div class="flex h-screen flex-col overflow-hidden">
-  <TopBar activeTab={mode} ontabchange={handleTabChange} />
+  <TopBar activeTab={mode} showUserMeta={mode === "术语库"} ontabchange={handleTabChange} />
 
   <div class="flex flex-1 overflow-hidden">
     <ProjectSidebar
@@ -118,10 +129,10 @@
         proofreadText={targetText}
         highlightIndex={1}
       />
-    {:else}
-      <div class="flex flex-1 items-center justify-center text-sm text-[#888888]">
-        术语库管理
-      </div>
+    {:else if mode === "术语库"}
+      <TerminologyView entries={termEntries} />
+    {:else if mode === "设置"}
+      <SettingsContent />
     {/if}
 
     {#if mode === "翻译模式"}
@@ -145,8 +156,8 @@
   </div>
 
   <StatusBar
-    suggestionCount={mode === "翻译模式" ? transSuggestions.length : proofSuggestions.length}
-    chatCount={3}
-    {cursorPos}
+    suggestionCount={mode === "翻译模式" ? transSuggestions.length : mode === "校对模式" ? proofSuggestions.length : 0}
+    chatCount={mode === "翻译模式" || mode === "校对模式" ? 3 : 0}
+    cursorPos={mode === "设置" ? "" : cursorPos}
   />
 </div>

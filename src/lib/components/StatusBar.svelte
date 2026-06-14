@@ -28,5 +28,7 @@
     </div>
     <span class="text-[11px] text-[#888888]">{autoSaveLabel}</span>
   </div>
-  <span class="font-mono text-[11px] text-[#666666]">{cursorPos}</span>
+  {#if cursorPos}
+    <span class="font-mono text-[11px] text-[#666666]">{cursorPos}</span>
+  {/if}
 </footer>

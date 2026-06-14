@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BookOpen } from "lucide-svelte";
+  import { BookOpen, Bell } from "lucide-svelte";
 
   const tabs = ["翻译模式", "校对模式", "术语库"];
 
@@ -8,6 +8,7 @@
     ontabchange,
   }: {
     activeTab?: string;
+    showUserMeta?: boolean;
     ontabchange?: (tab: string) => void;
   } = $props();
 </script>
