@@ -120,6 +120,7 @@
       <EditorArea
         {sourceText}
         {targetText}
+        onsourceinput={(t) => (sourceText = t)}
         ontargetinput={(t) => (targetText = t)}
         oncursorchange={(p) => (cursorPos = p)}
       />

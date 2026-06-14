@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { cn } from "$lib/utils";
-
   let {
     sourceLabel = "原文",
     targetLabel = "译文",
@@ -21,19 +19,16 @@
     oncursorchange?: (pos: string) => void;
   } = $props();
 
+  let sourceEl: HTMLTextAreaElement;
   let targetEl: HTMLTextAreaElement;
 
-  function handleTargetInput() {
-    ontargetinput?.(targetEl.value);
-    updateCursor(targetEl);
+  function handleInput(el: HTMLTextAreaElement, callback?: (t: string) => void) {
+    callback?.(el.value);
+    updateCursor(el);
   }
 
-  function handleTargetKeyUp() {
-    updateCursor(targetEl);
-  }
-
-  function handleTargetClick() {
-    updateCursor(targetEl);
+  function handleCursor(el: HTMLTextAreaElement) {
+    updateCursor(el);
   }
 
   function updateCursor(el: HTMLTextAreaElement) {
@@ -56,7 +51,14 @@
       {/if}
       <div class="flex-1"></div>
     </div>
-    <pre class="flex-1 overflow-auto p-3.5 font-mono text-sm leading-relaxed text-[#1A1A1A] whitespace-pre-wrap">{sourceText}</pre>
+    <textarea
+      bind:this={sourceEl}
+      class="flex-1 resize-none border-none bg-transparent p-3.5 font-mono text-sm leading-relaxed text-[#1A1A1A] whitespace-pre-wrap outline-none"
+      value={sourceText}
+      oninput={() => handleInput(sourceEl, onsourceinput)}
+      onkeyup={() => handleCursor(sourceEl)}
+      onclick={() => handleCursor(sourceEl)}
+    ></textarea>
   </section>
   <section class="flex flex-1 flex-col border-r border-[#CBCCC9]">
     <div class="flex items-center gap-2 border-b border-[#CBCCC9] px-3.5 py-1.5">
@@ -68,9 +70,9 @@
       bind:this={targetEl}
       class="flex-1 resize-none border-none bg-transparent p-3.5 font-mono text-sm leading-relaxed text-[#1A1A1A] whitespace-pre-wrap outline-none"
       value={targetText}
-      oninput={handleTargetInput}
-      onkeyup={handleTargetKeyUp}
-      onclick={handleTargetClick}
+      oninput={() => handleInput(targetEl, ontargetinput)}
+      onkeyup={() => handleCursor(targetEl)}
+      onclick={() => handleCursor(targetEl)}
     ></textarea>
   </section>
 </div>

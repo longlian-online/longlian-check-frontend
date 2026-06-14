@@ -1,31 +1,18 @@
-## Project Configuration
+# 前端
 
-- **Language**: TypeScript
-- **Package Manager**: bun
-- **Add-ons**: prettier, mcp, tailwindcss
+longlian-check 的子模块。完整仓库指引见根目录 `AGENTS.md`。
 
----
+**常用命令：**
+```
+bun run dev       # 开发服务器
+bun run check     # 类型检查（svelte-check）
+bun run build     # 生产构建
+bun run format    # prettier 格式化
+```
 
-You are able to use the Svelte MCP server, where you have access to comprehensive Svelte 5 and SvelteKit documentation. Here's how to use the available tools effectively:
-
-## Available Svelte MCP Tools:
-
-### 1. list-sections
-
-Use this FIRST to discover all available documentation sections. Returns a structured list with titles, use_cases, and paths.
-When asked about Svelte or SvelteKit topics, ALWAYS use this tool at the start of the chat to find relevant sections.
-
-### 2. get-documentation
-
-Retrieves full documentation content for specific sections. Accepts single or multiple sections.
-After calling the list-sections tool, you MUST analyze the returned documentation sections (especially the use_cases field) and then use the get-documentation tool to fetch ALL documentation sections that are relevant for the user's task.
-
-### 3. svelte-autofixer
-
-Analyzes Svelte code and returns issues and suggestions.
-You MUST use this tool whenever writing Svelte code before sending it to the user. Keep calling it until no issues or suggestions are returned.
-
-### 4. playground-link
-
-Generates a Svelte Playground link with the provided code.
-After completing the code, ask the user if they want a playground link. Only call this tool after user confirmation and NEVER if code was written to files in their project.
+**要点：**
+- Svelte 5 runes 模式，Tailwind v4
+- `$lib/utils.ts` 提供 `cn()`（clsx + tailwind-merge）
+- `$lib/components/` — 所有组件单文件
+- 图标用 `lucide-svelte`
+- 页面层管理 4 模式状态，通过 callback 向下传

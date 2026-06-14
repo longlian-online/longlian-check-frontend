@@ -17,7 +17,6 @@
     <div class="flex items-center gap-2 border-b border-[#CBCCC9] px-3.5 py-1.5">
       <div class="h-1.5 w-1.5 rounded-full bg-[#CBCCC9]"></div>
       <span class="text-[11px] text-[#888888]">译文 · 简体中文</span>
-      <span class="rounded-sm bg-[#F2F3F0] px-2 py-0.5 text-[10px] text-[#CBCCC9]">对照源</span>
       <div class="flex-1"></div>
     </div>
     <pre class="flex-1 overflow-auto p-3.5 font-mono text-sm leading-relaxed text-[#1A1A1A] whitespace-pre-wrap">{sourceText}</pre>
