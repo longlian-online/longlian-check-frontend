@@ -3,7 +3,13 @@
 
   const tabs = ["翻译模式", "校对模式", "术语库"];
 
-  let { activeTab = "翻译模式" }: { activeTab?: string } = $props();
+  let {
+    activeTab = "翻译模式",
+    ontabchange,
+  }: {
+    activeTab?: string;
+    ontabchange?: (tab: string) => void;
+  } = $props();
 </script>
 
 <header class="flex h-[52px] shrink-0 items-center gap-4 border-b bg-[#F7F8FA] px-4">
@@ -17,11 +23,19 @@
   <nav class="flex items-center">
     {#each tabs as tab}
       {#if tab === activeTab}
-        <div class="rounded-t-lg border border-b-0 border-[#CBCCC9] bg-[#F2F3F0] px-3.5 py-1.5 text-sm font-medium">
+        <button
+          class="cursor-pointer rounded-t-lg border border-b-0 border-[#CBCCC9] bg-[#F2F3F0] px-3.5 py-1.5 text-sm font-medium"
+          onclick={() => ontabchange?.(tab)}
+        >
           {tab}
-        </div>
+        </button>
       {:else}
-        <div class="px-3.5 py-1.5 text-sm text-[#888888]">{tab}</div>
+        <button
+          class="cursor-pointer px-3.5 py-1.5 text-sm text-[#888888] hover:text-[#1A1A1A]"
+          onclick={() => ontabchange?.(tab)}
+        >
+          {tab}
+        </button>
       {/if}
     {/each}
   </nav>
